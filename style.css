@@ -1,0 +1,48 @@
+textarea {
+  font-size: 130%;
+  font-family: 'Courier New', monospace;
+}
+
+#alert-wrong-words,
+#alert-words-not-safe,
+#help-mimabiao,
+.after-generate,
+.alerts-when-upload,
+.step-2,
+.step-3 {
+  display: none;
+}
+
+#next {
+  font-size: x-large;
+  font-weight: bold;
+}
+
+.caution-text {
+  color: red;
+}
+.caution-grey {
+  color: #333;
+  background-color: #ccc;
+}
+
+.alert-info {
+  color: #999;
+  background-color: #eee;
+}
+.alert-blue {
+  color: blue;
+  background-color: #eee;
+}
+.alert-danger {
+  color: red;
+  background-color: #eee;
+}
+
+footer {
+  color: grey;
+  text-align: center;
+  font-size: smaller;
+  margin-top: 150px;
+  margin-bottom: 20px;
+}

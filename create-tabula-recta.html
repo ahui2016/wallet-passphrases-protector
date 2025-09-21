@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>创建密码表 - 助记词保护器</title>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="english-words.js"></script>
+  <script src="util.js"></script>
+
+</head>
+<body>
+  <h1>创建密码表 - 助记词保护器</h1>
+  
+  <p class="caution-grey">【安全提示】 请在禁用插件的隐身窗口使用以下功能</p>
+
+  <p id="before-generate">
+    <br>
+    点击 <button id="generate-btn">generate</button> 生成新的密码表。
+  </p>
+
+  <p id="alert-words-not-safe" class="alert-danger">
+    出错，请再次点击 generate 按钮重新生成新的密码表。
+  </p>
+
+  <div class="after-generate">
+    <p>点击 <a id="download-btn" href="#" download="mimabiao.txt">download</a> 下载密码表。</p>
+    <p>建议下载后用 RAR 设密码打包密码表 (恢复记录设为 100%), 保存在外国网盘。</p>
+    <p class="caution-text">【注意！】 一旦遗失密码表，没有任何办法恢复受保护的助记词！</p>
+  </div>
+
+  <textarea id="output" rows="12" cols="60" disabled></textarea>
+
+  <div class="after-generate">
+    <p><span id="next">Next →</span> <a href="protecting.html">保护助记词</a></p>
+  </div>
+
+  <script>
+"use strict";
+
+const outputArea = $query("#output");
+const beforeGenerate = $query("#before-generate");
+const afterGenerate = $queryAll(".after-generate");
+const downloadBtn = $query('#download-btn');
+const alertWordsNotSafe = $query("#alert-words-not-safe");
+
+$query('#generate-btn').addEventListener('click', event => {
+  alertWordsNotSafe.style.display = "none";
+  // from english-words.js import englishWords
+  const shuffled = secureShuffle(englishWords);
+  if (isSameArrays(englishWords, shuffled)) {
+    alertWordsNotSafe.style.display = "block";
+    return;
+  }
+  const shuffled64 = btoa(JSON.stringify(shuffled));
+  outputArea.value = shuffled64;
+  const blob = new Blob([shuffled64], { type: 'text/plain' });
+  beforeGenerate.style.visibility = "hidden";
+  afterGenerate.forEach(node => node.style.display = "block");
+  downloadBtn.href = URL.createObjectURL(blob);
+  const today = getToday();
+  downloadBtn.download = `mimabiao-${today}.txt`;
+});
+
+  </script>
+
+</body>
+</html>

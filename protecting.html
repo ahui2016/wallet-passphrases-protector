@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>保护 - 助记词保护器</title>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="english-words.js"></script>
+  <script src="chinese-words.js"></script>
+  <script src="util.js"></script>
+
+  <style>
+  #output {
+    user-select: none;
+    background-color: #f0f0f0;
+    color: #000;
+  }
+  </style>
+
+</head>
+<body>
+  <h1>保护助记词</h1>
+  
+  <p class="caution-grey">【安全提示】 请在禁用插件的隐身窗口使用以下功能</p>
+
+  <h3>第一步</h3>
+
+  <div>
+    <div>点击下面的按钮上传密码表 <a id="help-mimabiao-btn" href="#">[?]</a></div>
+    <div id="help-mimabiao" class="alert-info">
+      如果没有密码表，请点击 <a href="create-tabula-recta.html">create-tabula-recta.html</a> 创建密码表。
+    </div>
+    <p><input type="file" id="upload-btn"></input></p>
+    <p id="success-when-upload" class="alerts-when-upload alert-blue">
+      上传密码表成功，请进行第二步。
+    </p>
+    <div id="alert-when-upload" class="alerts-when-upload alert-danger"></div>
+    <div id="alert-wrong-words" class="alert-danger">
+      密码表错误，请上传正确的密码表（应包含 2048 个指定单词的数组）。
+    </div>
+    <div id="alert-words-not-safe" class="alert-danger">
+      密码表不安全，该密码表与 2048 个原始单词顺序完全一致。<br>
+      请点击 <a href="create-tabula-recta.html">create-tabula-recta.html</a> 创建一个安全的密码表。
+    </div>
+  </div>
+
+  <h3 class="step-2">第二步</h3>
+
+  <div class="step-2">
+    <p>
+      输入英文助记词<br>
+      <span class="alert-info">数字、汉字、标点符号会被自动忽略。</span>
+    </p>
+    
+    <textarea id="input-en-words" rows="12" cols="60" placeholder="在此输入英文助记词"></textarea>
+    
+    <p>
+      点击 <button id="submit-btn">执行</button> 把上面的英文助记词转换为下面的汉字助记词
+      <span class="alert-info">为了安全，请勿复制，请勿截图</span>
+    </p>
+    
+    <p id="alert-submit-error" class="alert-danger"></p>
+    
+    <textarea id="output" rows="12" cols="60" readonly></textarea>
+    
+    <p class="step-3">请抄写记录上述汉字助记词，为了安全，请勿复制，请勿截图。</p>
+    <p class="step-3">汉字助记词应与密码表分开保存（例如密码表保存在外国网盘、汉字助记词保存在实体纸张）</p>
+  </div>
+
+  <h3 class="step-3">Next</h3>
+  
+  <div class="step-3">
+    如果你不熟悉本工具，<br>
+    请点击 <a href="reveal.html">reveal.html</a> 立即体验找回英语助记词的过程。
+  </div>
+
+
+  <footer>__ BOTTOM LINE __</footer>
+
+  <script>
+"use strict";
+
+const mimabiao_en2cn = new Map();
+
+const uploadBtn =         $query('#upload-btn');
+const helpMimabiaoBtn =   $query('#help-mimabiao-btn');
+const helpMimabiao =      $query("#help-mimabiao");
+const successWhenUpload = $query("#success-when-upload");
+const alertWhenUpload =   $query("#alert-when-upload");
+const alertWrongWords =   $query("#alert-wrong-words");
+const alertWordsNotSafe = $query("#alert-words-not-safe");
+const inputEnglishArea =  $query("#input-en-words");
+const submitBtn =         $query("#submit-btn");
+const alertSubmitError =  $query("#alert-submit-error");
+const outputArea =        $query("#output");
+
+const allAlertsWhenUpload = $queryAll(".alerts-when-upload");
+const step2 =               $queryAll(".step-2");
+
+["mousedown", "dblclick", "selectstart"].forEach(eventName => {
+  outputArea.addEventListener(eventName, e => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  });
+});
+
+$query('#help-mimabiao-btn').addEventListener('click', event => {
+  if (helpMimabiao.style.display == "block") {
+    helpMimabiao.style.display = "none";
+  } else {
+    helpMimabiao.style.display = "block";
+  }
+});
+
+uploadBtn.addEventListener('change', async (event) => {
+  allAlertsWhenUpload.forEach(node => node.style.display = "none");
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Blob/text
+    const mimabiao64 = await file.text();
+    const mimabiao = checkGetMimabiao(mimabiao64);
+    for (let i = 0; i < mimabiao.length; i++) {
+      mimabiao_en2cn.set(mimabiao[i], chineseWords[i]);
+    }
+    successWhenUpload.style.display = "block";
+    uploadBtn.disabled = true;
+    step2.forEach(node => node.style.display = "block");
+    inputEnglishArea.focus();
+  } catch (error) {
+      alertWhenUpload.style.display = "block";
+      alertWhenUpload.innerText = "出错： " + error;
+  }
+});
+
+submitBtn.addEventListener('click', event => {
+  alertSubmitError.innerText = "";
+  outputArea.value = "";
+  const enWords = inputEnglishArea.value.split(/[^a-zA-Z]/).filter(elem => elem !== "");
+  const cnWords = convertE2C(enWords);
+  if (typeof cnWords == "number") {
+    const err = `错误： 找不到 [${enWords[cnWords]}] (提示：不可输入标点符号)`;
+    alertSubmitError.innerText = err;
+    return;
+  }
+  const outputWords = insertLineBreaks(cnWords, 12); // 每 12 个汉字换行
+  outputArea.value = outputWords.join("");
+  $queryAll(".step-3").forEach(node => node.style.display = "block");
+});
+
+function convertE2C(enWords) {
+  const cnWords = [];
+  for (let i=0; i < enWords.length; i++) {
+    const cn = mimabiao_en2cn.get(enWords[i]);
+    if (!cn) return i;
+    cnWords.push(cn);
+  }
+  return cnWords;
+}
+
+/**
+ * 检查密码表是否符合要求: 含有 2048 个原始单词，但顺序必须随机。
+ * mimabiao64 是 base64 形式的密码表。
+ * 符合要求返回密码表，否则返回 false。
+ */
+function checkGetMimabiao(mimabiao64) {
+  const mimabiaoJSON = atob(mimabiao64);
+  const mimabiao = JSON.parse(mimabiaoJSON);
+  if (!isArraysHaveSameElements(mimabiao, englishWords)) {
+    alertWrongWords.style.display = "block";
+    return false;
+  }
+  if (isSameArrays(mimabiao, englishWords)) {
+    alertWordsNotSafe.style.display = "block";
+    return false;
+  }
+  return mimabiao;
+}
+
+  </script>
+
+</body>
+</html>
