@@ -2,6 +2,12 @@
 
 为了安全，本项目采用完全本地运行的 HTML 和 JS, 完全不使用第三方库。
 
+## 比金属板打点更好
+
+- 我的灵感来源是这个 [onekey 金属板打点](https://onekey.so/zh_CN/products/onekey-keytag/)
+- 但我认为金属板有两个问题：1. 贵； 2. 不够安全。
+- 于是我想出了这个替代方法，用汉字来代替打点，比金属板更安全、更不怕丢失，而且还免费
+
 ## 使用方法
 
 下载本项目的全部 html 和 js 到本地，双击打开 index.html 即可开始使用。
@@ -35,3 +41,4 @@
 ## 参考
 
 - [https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md](https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md)
+
